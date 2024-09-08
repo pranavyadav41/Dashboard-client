@@ -1,18 +1,58 @@
-import React from "react";
-import { Stepper } from 'react-form-stepper';
-import { motion } from 'framer-motion';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Stepper } from "react-form-stepper";
+import { motion } from "framer-motion";
+import { useFormik } from "formik";
+import { toast } from "../common/toast";
+import * as Yup from "yup";
 import BasicInfo from "./BasicInfo";
 import Employment from "./Employment";
 import AdditionalInfo from "./AdditionalInfo";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { FaLongArrowAltLeft } from "react-icons/fa";
-import { addEmployee } from "../../api/employee";
+import {
+  addEmployee,
+  getEmployeeById,
+  updateEmployee,
+} from "../../api/employee";
+import { handleError } from "../common/errorHandler";
 
-const AddEmployee = () => {
+const AddEmployee = ({ isEditing = false, employeeId = null }) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const [completedSteps, setCompletedSteps] = React.useState([]);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchEmployeeData() {
+      if (isEditing && employeeId) {
+        try {
+          const response = await getEmployeeById(employeeId);
+          const employeeData = response[0];
+          formik.setValues({
+            name: employeeData.name || "",
+            dob: employeeData.dob
+              ? new Date(employeeData.dob).toISOString().split("T")[0]
+              : "",
+            gender: employeeData.gender || "",
+            email: employeeData.email || "",
+            phone: employeeData.phone || "",
+            employementType: employeeData.employementType || "",
+            department: employeeData.department || "",
+            jobTitle: employeeData.jobTitle || "",
+            salary: employeeData.salary || "",
+            address: employeeData.address || "",
+            skills: employeeData.skills ? employeeData.skills.join(", ") : "",
+            educationLevel: employeeData.educationLevel || "",
+          });
+        } catch (error) {
+          handleError(error);
+        }
+      }
+    }
+
+    fetchEmployeeData();
+  }, [isEditing, employeeId]);
 
   const steps = [
     { label: "Basic Info" },
@@ -25,7 +65,9 @@ const AddEmployee = () => {
       name: Yup.string().required("Name is required"),
       dob: Yup.string().required("Date of birth is required"),
       gender: Yup.string().required("Gender is required"),
-      email: Yup.string().email("Invalid email address").required("Email is required"),
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
       phone: Yup.string().required("Phone number is required"),
     }),
     Yup.object({
@@ -37,11 +79,10 @@ const AddEmployee = () => {
     Yup.object({
       address: Yup.string().required("Address is required"),
       skills: Yup.string().required("Skills are required"),
-      educationLevel:Yup.string().required("Education level is required")
-    })
+      educationLevel: Yup.string().required("Education level is required"),
+    }),
   ];
 
-  // Using Formik for form management
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -55,68 +96,93 @@ const AddEmployee = () => {
       salary: "",
       address: "",
       skills: "",
-      educationLevel:""
+      educationLevel: "",
     },
-    validationSchema: validationSchemas[activeStep], // Apply validation based on the active step
+    validationSchema: validationSchemas[activeStep],
     onSubmit: (values) => {
-      sendFormData(values)
+      sendFormData(values);
     },
   });
-
 
   const sendFormData = async (formData) => {
     try {
       const modifiedFormData = {
         ...formData,
-        skills: formData.skills.split(',').map(skill => skill.trim()), // Convert the string to an array
+        skills: formData.skills.split(",").map((skill) => skill.trim()),
       };
-      const response = await addEmployee(modifiedFormData)
-      console.log(response)
+      let response;
+      if (isEditing) {
+        response = await updateEmployee(employeeId, modifiedFormData);
+        toast.success(response.message);
+        navigate(`/employeeDetail/${employeeId}`);
+      } else {
+        response = await addEmployee(modifiedFormData);
+        toast.success(response.message);
+        navigate("/listEmployees");
+      }
     } catch (error) {
-      console.error('Error submitting the form:', error);
-      // You can handle error feedback to the user here
+      handleError(error);
     }
   };
 
   function getSectionComponent() {
     switch (activeStep) {
       case 0:
-        return <BasicInfo formData={formik.values} handleChange={formik.handleChange} errors={formik.errors} touched={formik.touched} />;
+        return (
+          <BasicInfo
+            formData={formik.values}
+            handleChange={formik.handleChange}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+        );
       case 1:
-        return <Employment formData={formik.values} handleChange={formik.handleChange} errors={formik.errors} touched={formik.touched} />;
+        return (
+          <Employment
+            formData={formik.values}
+            handleChange={formik.handleChange}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+        );
       case 2:
-        return <AdditionalInfo formData={formik.values} handleChange={formik.handleChange} errors={formik.errors} touched={formik.touched} />;
+        return (
+          <AdditionalInfo
+            formData={formik.values}
+            handleChange={formik.handleChange}
+            errors={formik.errors}
+            touched={formik.touched}
+          />
+        );
       default:
         return null;
     }
   }
 
   const handleNext = async () => {
-    // Run validation schema for the current step
     const errors = await formik.validateForm();
-  
-    // If no errors, move to the next step
+
     if (Object.keys(errors).length === 0) {
       setActiveStep((prevStep) => {
         const nextStep = prevStep + 1;
-        // Mark the step as completed
         if (!completedSteps.includes(prevStep)) {
           setCompletedSteps((prev) => [...prev, prevStep]);
         }
         return nextStep;
       });
     } else {
-      // If there are errors, mark the fields as touched
       formik.setTouched({
         ...formik.touched,
-        ...Object.keys(errors).reduce((acc, field) => ({ ...acc, [field]: true }), {}),
+        ...Object.keys(errors).reduce(
+          (acc, field) => ({ ...acc, [field]: true }),
+          {}
+        ),
       });
     }
   };
-  
 
   const handlePrevious = () => {
-    setActiveStep(prevStep => prevStep - 1);
+    setActiveStep((prevStep) => prevStep - 1);
   };
 
   return (
@@ -125,24 +191,24 @@ const AddEmployee = () => {
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">
-              Add New Employee
+              {isEditing ? "Edit Details" : "Add New Employee"}
             </h2>
             <Stepper
               steps={steps}
               activeStep={activeStep}
               completed={completedSteps}
               connectorStyleConfig={{
-                completedColor: '#4ade80',
-                activeColor: '#60a5fa',
-                disabledColor: '#e5e7eb'
+                completedColor: "#4ade80",
+                activeColor: "#60a5fa",
+                disabledColor: "#e5e7eb",
               }}
               styleConfig={{
-                activeBgColor: '#60a5fa',
-                completedBgColor: '#4ade80',
-                inactiveBgColor: '#e5e7eb',
-                activeTextColor: '#ffffff',
-                completedTextColor: '#ffffff',
-                inactiveTextColor: '#374151'
+                activeBgColor: "#60a5fa",
+                completedBgColor: "#4ade80",
+                inactiveBgColor: "#e5e7eb",
+                activeTextColor: "#ffffff",
+                completedTextColor: "#ffffff",
+                inactiveTextColor: "#374151",
               }}
             />
             <motion.div
@@ -161,7 +227,8 @@ const AddEmployee = () => {
                   onClick={handlePrevious}
                   className="px-4 py-2 flex items-center gap-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
                 >
-                  <FaLongArrowAltLeft />Previous
+                  <FaLongArrowAltLeft />
+                  Previous
                 </button>
               )}
               {activeStep < steps.length - 1 ? (
@@ -176,7 +243,7 @@ const AddEmployee = () => {
                   onClick={formik.handleSubmit}
                   className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 >
-                  Submit
+                  {isEditing ? "Save Changes" : "Submit"}
                 </button>
               )}
             </div>

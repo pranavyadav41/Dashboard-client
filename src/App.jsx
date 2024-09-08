@@ -4,6 +4,8 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import AddEmployee from "./components/employee/AddEmployee";
 import EmployeeList from './components/employee/ListEmployees';
+import EmploymentDetails from './components/employee/EmployeeDetails';
+import EditEmployee from './components/employee/EditEmployee';
 
 function App() {
   return (
@@ -18,9 +20,13 @@ function App() {
           } />
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/listEmployees" element={<EmployeeList />} />
+          <Route path="/employeeDetail/:id" element={<EmploymentDetails/>} />
+          <Route path="/edit-employee/:id" element={<EditEmployee />} />
         </Routes>
       </div>
     </Router>
+    
+    
   );
 }
 

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import AddEmployee from "./components/employee/AddEmployee";
+import EmployeeList from './components/employee/ListEmployees';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             </main>
           } />
           <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/listEmployees" element={<EmployeeList />} />
         </Routes>
       </div>
     </Router>

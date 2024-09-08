@@ -1,6 +1,8 @@
 import React from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Users, UserPlus, Briefcase } from 'lucide-react';
+import { IoPeople } from "react-icons/io5";
+import ListEmployees from './employee/ListEmployees';
 
 const Hero = () => {
 
@@ -8,6 +10,9 @@ const Hero = () => {
 
     function addEmployee(){
         navigate('/addEmployee')
+    }
+    function listEmployee(){
+      navigate('/listEmployees')
     }
   return (
     <div className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 h-[670px]">
@@ -19,13 +24,20 @@ const Hero = () => {
           <p className="mt-3 max-w-md mx-auto text-base md:text-xl md:max-w-3xl">
           Efficiently manage employee details with our simple system to add, update, and delete records.
           </p>
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 gap-5 flex justify-center">
             <button
               onClick={addEmployee}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 transition duration-300"
+              className="inline-flex gap-2 md:gap-0 items-center px-3 py-3 md:px-6 md:py-3 border border-transparent text-sm md:text-base font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 transition duration-300"
             >
-              <UserPlus className="mr-2" size={20} />
+              <UserPlus className="md:mr-2" size={20} />
               Add Employee
+            </button>
+            <button
+              onClick={listEmployee}
+              className="inline-flex gap-2 md:gap-0 items-center px-3 py-3 md:px-6 md:py-3 border border-transparent text-sm md:text-base font-medium rounded-md text-indigo-700 bg-white hover:bg-indigo-50 transition duration-300"
+            >
+              <IoPeople className='md:mr-2' size={20} />
+              View Employees
             </button>
           </div>
         </div>

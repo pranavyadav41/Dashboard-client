@@ -8,6 +8,7 @@ import Employment from "./Employment";
 import AdditionalInfo from "./AdditionalInfo";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { FaLongArrowAltLeft } from "react-icons/fa";
+import { addEmployee } from "../../api/employee";
 
 const AddEmployee = () => {
   const [activeStep, setActiveStep] = React.useState(0);
@@ -58,9 +59,24 @@ const AddEmployee = () => {
     },
     validationSchema: validationSchemas[activeStep], // Apply validation based on the active step
     onSubmit: (values) => {
-      console.log("Form submitted:", values);
+      sendFormData(values)
     },
   });
+
+
+  const sendFormData = async (formData) => {
+    try {
+      const modifiedFormData = {
+        ...formData,
+        skills: formData.skills.split(',').map(skill => skill.trim()), // Convert the string to an array
+      };
+      const response = await addEmployee(modifiedFormData)
+      console.log(response)
+    } catch (error) {
+      console.error('Error submitting the form:', error);
+      // You can handle error feedback to the user here
+    }
+  };
 
   function getSectionComponent() {
     switch (activeStep) {

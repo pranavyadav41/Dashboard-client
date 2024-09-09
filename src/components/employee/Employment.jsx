@@ -3,7 +3,7 @@ import React from "react";
 const EmploymentDetails = ({ formData, handleChange, errors, touched }) => {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
+      <h2 className="text-xl md:text-2xl font-bold md:mb-6">
         Employment Details
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

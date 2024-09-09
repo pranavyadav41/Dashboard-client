@@ -8,8 +8,7 @@ import * as Yup from "yup";
 import BasicInfo from "./BasicInfo";
 import Employment from "./Employment";
 import AdditionalInfo from "./AdditionalInfo";
-import { FaLongArrowAltRight } from "react-icons/fa";
-import { FaLongArrowAltLeft } from "react-icons/fa";
+import { FaLongArrowAltRight, FaLongArrowAltLeft } from "react-icons/fa";
 import {
   addEmployee,
   getEmployeeById,
@@ -30,7 +29,7 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
           const response = await getEmployeeById(employeeId);
           const employeeData = response[0];
           formik.setValues({
-            name: employeeData.name || "",
+            name: employeeData.name.trim() || "",
             dob: employeeData.dob
               ? new Date(employeeData.dob).toISOString().split("T")[0]
               : "",
@@ -62,23 +61,71 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
 
   const validationSchemas = [
     Yup.object({
-      name: Yup.string().required("Name is required"),
-      dob: Yup.string().required("Date of birth is required"),
-      gender: Yup.string().required("Gender is required"),
+      name: Yup.string()
+        .trim()
+        .matches(/^[a-zA-Z\s]+$/, "Name should not contain special characters")
+        .min(2, "Name must be at least 2 characters")
+        .max(50, "Name must be at most 50 characters")
+        .required("Name is required"),
+
+      dob: Yup.date()
+        .typeError("Invalid date format")
+        .required("Date of birth is required"),
+
+      gender: Yup.string()
+        .oneOf(["male", "female", "other"], "Invalid gender")
+        .required("Gender is required"),
+
       email: Yup.string()
+        .trim()
         .email("Invalid email address")
         .required("Email is required"),
-      phone: Yup.string().required("Phone number is required"),
+
+      phone: Yup.string()
+        .trim()
+        .matches(
+          /^[1-9][0-9]{9}$/,
+          "Phone number must be valid and exactly 10 digits"
+        )
+        .required("Phone number is required"),
     }),
+
     Yup.object({
-      employementType: Yup.string().required("Employement type is required"),
-      department: Yup.string().required("Department is required"),
-      jobTitle: Yup.string().required("Job title is required"),
-      salary: Yup.number().required("Salary is required"),
+      employementType: Yup.string()
+        .oneOf(
+          ["full-time", "part-time", "contract"],
+          "Invalid employment type"
+        )
+        .required("Employment type is required"),
+
+      department: Yup.string()
+        .min(2, "Department must be at least 2 characters")
+        .required("Department is required"),
+
+      jobTitle: Yup.string()
+        .min(2, "Job title must be at least 2 characters")
+        .required("Job title is required"),
+
+      salary: Yup.number()
+        .positive("Salary must be a positive number")
+        .required("Salary is required"),
     }),
+
     Yup.object({
-      address: Yup.string().required("Address is required"),
-      skills: Yup.string().required("Skills are required"),
+      address: Yup.string()
+        .trim()
+        .min(5, "Address must be at least 5 characters")
+        .required("Address is required"),
+
+      skills: Yup.string()
+        .trim()
+        .matches(
+          /^[a-zA-Z,\s]+$/,
+          "Skills should not contain special characters"
+        )
+        .min(3, "Please list at least one skill")
+        .required("Skills are required"),
+
       educationLevel: Yup.string().required("Education level is required"),
     }),
   ];
@@ -120,9 +167,7 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
         toast.success(response.message);
         navigate("/listEmployees");
       }
-    } catch (error) {
-      handleError(error);
-    }
+    } catch (error) {}
   };
 
   function getSectionComponent() {
@@ -185,26 +230,34 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
+  const handleCancel = () => {
+    if (isEditing) {
+      navigate(`/employeeDetail/${employeeId}`);
+    } else {
+      navigate("/listEmployees");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-3xl font-extrabold text-gray-900 text-center mb-8">
-              {isEditing ? "Edit Details" : "Add New Employee"}
+            <h2 className=" text-2xl md:text-3xl font-extrabold text-gray-900 text-center md:mb-8">
+              {isEditing ? "Edit Employee Details" : "Add New Employee"}
             </h2>
             <Stepper
               steps={steps}
               activeStep={activeStep}
               completed={completedSteps}
               connectorStyleConfig={{
-                completedColor: "#4ade80",
+                completedColor: "black",
                 activeColor: "#60a5fa",
                 disabledColor: "#e5e7eb",
               }}
               styleConfig={{
-                activeBgColor: "#60a5fa",
-                completedBgColor: "#4ade80",
+                activeBgColor: "black",
+                completedBgColor: "#00c800",
                 inactiveBgColor: "#e5e7eb",
                 activeTextColor: "#ffffff",
                 completedTextColor: "#ffffff",
@@ -221,31 +274,52 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
             >
               {getSectionComponent()}
             </motion.div>
-            <div className="mt-8 flex justify-between">
-              {activeStep > 0 && (
-                <button
-                  onClick={handlePrevious}
-                  className="px-4 py-2 flex items-center gap-2 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
-                >
-                  <FaLongArrowAltLeft />
-                  Previous
-                </button>
-              )}
-              {activeStep < steps.length - 1 ? (
-                <button
-                  onClick={handleNext}
-                  className="px-5 py-2 flex gap-2 items-center border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
-                >
-                  Next <FaLongArrowAltRight color="white" />
-                </button>
-              ) : (
-                <button
-                  onClick={formik.handleSubmit}
-                  className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  {isEditing ? "Save Changes" : "Submit"}
-                </button>
-              )}
+            <div className="mt-8 flex flex-col space-y-4">
+              <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:space-y-0">
+                <div className="order-last sm:order-first">
+                  {activeStep > 0 && (
+                    <button
+                      onClick={handlePrevious}
+                      className="w-full sm:w-auto px-4 py-2 mt-2 flex items-center justify-center gap-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                    >
+                      <FaLongArrowAltLeft />
+                      Previous
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+                  <button
+                    onClick={handleCancel}
+                    className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-600 bg-transparent hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Cancel
+                  </button>
+                  {isEditing && (
+                    <button
+                      onClick={formik.handleSubmit}
+                      className="px-4 h-10  border border-transparent text-sm font-normal rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                      Save Changes
+                    </button>
+                  )}
+                  {activeStep < steps.length - 1 && (
+                    <button
+                      onClick={handleNext}
+                      className="px-4 h-10 flex gap-2 items-center justify-center border border-transparent text-sm font-medium rounded-md text-white bg-gray-800 hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                    >
+                      Next <FaLongArrowAltRight color="white" />
+                    </button>
+                  )}
+                  {!isEditing && activeStep === steps.length - 1 && (
+                    <button
+                      onClick={formik.handleSubmit}
+                      className="px-4 h-10 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                    >
+                      Submit
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import AddEmployee from './AddEmployee';
+import React from "react";
+import { useParams } from "react-router-dom";
+import AddEmployee from "./AddEmployee";
 
 const EditEmployee = () => {
   const { id } = useParams();

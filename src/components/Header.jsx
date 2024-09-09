@@ -11,9 +11,6 @@ const Header = () => {
               Dashboard
             </NavLink>
           </div>
-          
-          {/* You can add more header items here if needed */}
-          
         </div>
       </div>
     </header>

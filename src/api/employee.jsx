@@ -12,18 +12,18 @@ export const addEmployee = async (employeeData) => {
     }
   };
 
-export const getEmployees = async() => {
+  export const getEmployees = async ({ search, departments, roles, page }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/employee/getEmployees`,)
+      const response = await axios.get(`${API_BASE_URL}/employee/getEmployees`, {
+        params: { search, departments, roles, page }
+      });
       return response.data;
-    
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
-  };  
+  };
 export const getEmployeeById = async(id) => {
   try {
-    console.log("reached here")
     const response = await axios.get(`${API_BASE_URL}/employee/getEmployee/${id}`)
     return response.data;
   } catch (error) {
@@ -32,7 +32,6 @@ export const getEmployeeById = async(id) => {
 }
 export const deleteEmployeeById = async(id) => {
   try {
-    console.log(id,"hmmm")
     const response = await axios.post(`${API_BASE_URL}/employee/deleteEmployee/${id}`)
     return response.data;
     

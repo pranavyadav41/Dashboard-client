@@ -3,7 +3,7 @@ import React from "react";
 const AdditionalInfo = ({ formData, handleChange, errors, touched }) => {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Additional Information</h2>
+      <h2 className="text-xl md:text-2xl font-bold md:mb-6">Additional Information</h2>
       <div className="space-y-6">
         <div>
           <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import LoadingSpinner from './components/common/loadingSpinner';
 
 // Lazy load components
 const AddEmployee = lazy(() => import('./components/employee/AddEmployee'));
@@ -14,7 +15,7 @@ function App() {
     <Router>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingSpinner/>}>
           <Routes>
             <Route path="/" element={
               <main className="flex-grow">

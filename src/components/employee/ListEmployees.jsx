@@ -14,14 +14,6 @@ import debounce from "lodash/debounce";
 const departments = ["IT", "HR", "Finance", "Marketing"];
 const roles = ["Developer", "Manager", "Accountant", "Designer", "Specialist"];
 
-const Spinner = () => (
-  <motion.div
-    animate={{ rotate: 360 }}
-    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-  >
-    <Loader className="w-12 h-12 text-black" />
-  </motion.div>
-);
 
 const EmployeeList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,7 +39,6 @@ const EmployeeList = () => {
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching employees:", error);
-      // TODO: Implement proper error handling
     }
     setLoading(false);
   }, [searchTerm, selectedDepartments, selectedRoles, page]);
@@ -165,7 +156,7 @@ const EmployeeList = () => {
           <div className="relative w-full sm:w-64">
             <input
               type="text"
-              placeholder="Search employees..."
+              placeholder="search by name or dob"
               onChange={handleSearchChange}
               className="w-full pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300"
             />

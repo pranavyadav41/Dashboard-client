@@ -103,7 +103,7 @@ const BasicInfo = ({ formData, handleChange, errors, touched, setFieldError }) =
           <input
             id="phone"
             name="phone"
-            placeholder="+1 (123) 456-7890"
+            placeholder="Enter you phone"
             value={formData.phone}
             onChange={handleChange}
             className={`w-full px-3 py-2 border ${errors.phone && touched.phone ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200`}

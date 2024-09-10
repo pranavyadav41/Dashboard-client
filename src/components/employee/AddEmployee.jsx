@@ -19,6 +19,7 @@ import { handleError } from "../common/errorHandler";
 const AddEmployee = ({ isEditing = false, employeeId = null }) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const [completedSteps, setCompletedSteps] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const navigate = useNavigate();
 
@@ -152,6 +153,7 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
   });
 
   const sendFormData = async (formData) => {
+    setLoading(true);
     try {
       const modifiedFormData = {
         ...formData,
@@ -168,6 +170,9 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
         navigate("/listEmployees");
       }
     } catch (error) {}
+     finally {
+    setLoading(false);
+  }
   };
 
   function getSectionComponent() {
@@ -299,7 +304,7 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
                       onClick={formik.handleSubmit}
                       className="px-4 h-10  border border-transparent text-sm font-normal rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
-                      Save Changes
+                      {loading ? "Submitting..":"Save changes"}
                     </button>
                   )}
                   {activeStep < steps.length - 1 && (
@@ -315,7 +320,7 @@ const AddEmployee = ({ isEditing = false, employeeId = null }) => {
                       onClick={formik.handleSubmit}
                       className="px-4 h-10 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
-                      Submit
+                      {loading ? "Submitting..." : "Submit"}
                     </button>
                   )}
                 </div>

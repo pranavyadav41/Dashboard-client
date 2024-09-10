@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {handleError} from '../components/common/errorHandler'
 
-const API_BASE_URL = 'https://soundtastic.shop/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export const addEmployee = async (employeeData) => {
     try {
